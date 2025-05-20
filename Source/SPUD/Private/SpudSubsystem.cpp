@@ -225,6 +225,11 @@ void USpudSubsystem::OnSeamlessTravelTransition(UWorld* World)
 
 void USpudSubsystem::OnLevelStreamingStateChanged(UWorld* InWorld, const ULevelStreaming* InLevelStreaming, ULevel* InLevelIfLoaded, ELevelStreamingState InPreviousState, ELevelStreamingState InNewState)
 {
+	if (!InLevelIfLoaded)
+	{
+		return;
+	}
+
 	if (InPreviousState == ELevelStreamingState::Loading && InNewState == ELevelStreamingState::LoadedNotVisible)
 	{
 		// restore state actors
