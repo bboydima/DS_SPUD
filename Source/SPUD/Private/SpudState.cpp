@@ -177,7 +177,8 @@ void USpudState::WriteCoreActorData(AActor* Actor, FArchive& Out) const
 	SpudPropertyUtil::WriteRaw(CoreDataVersion, Out);
 
 	SpudPropertyUtil::WriteRaw(Actor->IsHidden(), Out);
-	SpudPropertyUtil::WriteRaw(Actor->GetTransform(), Out);
+	const FTransform& ActorTransform = Actor->GetTransform();
+	SpudPropertyUtil::WriteRaw(ActorTransform, Out);
 	
 	FVector Velocity = FVector::ZeroVector;
 	FVector AngularVelocity = FVector::ZeroVector;
@@ -318,14 +319,15 @@ FSpudSpawnedActorData* USpudState::GetSpawnedActorData(AActor* Actor, FSpudSaveD
 
 void USpudState::StoreActor(AActor* Actor)
 {
-	if (Actor->HasAnyFlags(RF_ClassDefaultObject|RF_ArchetypeObject|RF_BeginDestroyed))
+	if (Actor->HasAnyFlags(RF_ClassDefaultObject | RF_ArchetypeObject | RF_BeginDestroyed))
+	{
 		return;
+	}
 
 	const FString LevelName = GetLevelNameForActor(Actor);
 
 	auto LevelData = GetLevelData(LevelName, true);
 	StoreActor(Actor, LevelData);
-		
 }
 
 void USpudState::StoreLevelActorDestroyed(AActor* Actor)
@@ -1022,8 +1024,10 @@ void USpudState::RestoreGlobalObject(UObject* Obj, const FSpudNamedObjectData* D
 }
 void USpudState::StoreActor(AActor* Actor, FSpudSaveData::TLevelDataPtr LevelData)
 {
-	if (Actor->HasAnyFlags(RF_ClassDefaultObject|RF_ArchetypeObject|RF_BeginDestroyed))
+	if (Actor->HasAnyFlags(RF_ClassDefaultObject | RF_ArchetypeObject | RF_BeginDestroyed))
+	{
 		return;
+	}
 
 	// GetUniqueID() is unique in the current play session but not across games
 	// GetFName() is unique within a level, and stable for objects loaded from a level
@@ -1089,17 +1093,22 @@ void USpudState::StoreActor(AActor* Actor, FSpudSaveData::TLevelDataPtr LevelDat
 		// Something went wrong, we'll assume the detail has been logged elsewhere
 		return;	
 	}
-	
 
 	if (bRespawn)
+	{
 		UE_LOG(LogSpudState, Verbose, TEXT(" * STORE Runtime Actor: %s (%s)"), *Guid.ToString(EGuidFormats::DigitsWithHyphens), *Name)
+	}
 	else
+	{
 		UE_LOG(LogSpudState, Verbose, TEXT(" * STORE Level Actor: %s/%s"), *LevelData->Name, *Name);
+	}
 
 	bool bIsCallback = Actor->GetClass()->ImplementsInterface(USpudObjectCallback::StaticClass());
 
 	if (bIsCallback)
+	{
 		ISpudObjectCallback::Execute_SpudPreStore(Actor, this);
+	}
 
 	// Core data first
 	pDestCoreData->Empty();
