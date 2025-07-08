@@ -437,7 +437,9 @@ void USpudState::RestoreLevel(UWorld* World, const FString& LevelName)
 void USpudState::RestoreLevel(ULevel* Level)
 {
 	if (!IsValid(Level))
+	{
 		return;
+	}
 	
 	FString LevelName = GetLevelName(Level);
 	auto LevelData = GetLevelData(LevelName, false);
@@ -458,7 +460,9 @@ void USpudState::RestoreLevel(ULevel* Level)
 	{
 		auto Actor = RespawnActor(SpawnedActor.Value, LevelData->Metadata, Level);
 		if (Actor)
+		{
 			RuntimeObjectsByGuid.Add(SpawnedActor.Value.Guid, Actor);
+		}
 		// Spawned actors will have been added to Level->Actors, their state will be restored there
 	}
 	// Restore existing actor state
